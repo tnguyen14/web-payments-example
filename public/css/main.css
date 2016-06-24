@@ -110,6 +110,9 @@ textarea {
 	flex-basis: 25%;
 	padding: 0 .5rem;
 }
+.product.product-highlight {
+	background-color: #d5d5d5;
+}
 .product img {
 	width: 100%;
 	height: auto;
