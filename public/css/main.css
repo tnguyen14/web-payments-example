@@ -117,13 +117,23 @@ textarea {
 }
 
 .apple-pay {
-	background-image: -webkit-named-image(apple-pay-logo-black);
-	background-size: 100% 100%;
+	background-size: 100% 60%;
+	background-position: center;
 	background-repeat: no-repeat;
-	border: 1px solid black;
+	border: 1px solid transparent;
+	border-radius: 5px;
 }
-
-
+.apple-pay.white {
+	background-image: -webkit-named-image(apple-pay-logo-black);
+	background-color: white;
+}
+.apple-pay.black {
+	background-image: -webkit-named-image(apple-pay-logo-white);
+	background-color: black;
+}
+.apple-pay.white.outline {
+	border-color: black;
+}
 
 
 
