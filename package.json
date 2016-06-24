@@ -1,0 +1,21 @@
+{
+  "name": "apple-pay-web-example",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "doc": "doc"
+  },
+  "scripts": {
+    "start": "forever start server/index.js && forever logs -f 0",
+    "dev": "forever start -w server/index.js && forever logs -f 0",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.14.0",
+    "forever": "^0.15.2"
+  }
+}
