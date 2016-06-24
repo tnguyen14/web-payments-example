@@ -101,17 +101,29 @@ textarea {
    ========================================================================== */
 
 .products {
-	margin-left: 2rem;
+	align-items: center;
+	display: flex;
+	width: 90%;
+	margin: 1rem auto;
 }
 .product {
-	width: 20em;
+	flex-basis: 25%;
+	padding: 0 .5rem;
 }
 .product img {
 	width: 100%;
+	height: auto;
+}
+.product h3 {
+	text-align: center;
+}
+.product .price {
+	margin-bottom: 1rem;
+	text-align: center;
 }
 .product button {
 	display: block;
-	margin-bottom: .3rem;
+	margin: 0 auto .3rem;
 	width: 150px;
 	height: 50px;
 }
@@ -134,16 +146,6 @@ textarea {
 .apple-pay.white.outline {
 	border-color: black;
 }
-
-
-
-
-
-
-
-
-
-
 
 
 
