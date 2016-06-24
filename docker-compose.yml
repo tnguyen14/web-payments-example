@@ -3,5 +3,5 @@ services:
   apple-pay-web-example:
     build: .
     ports:
-     - "14011:3000"
+     - "14013:3000"
 
