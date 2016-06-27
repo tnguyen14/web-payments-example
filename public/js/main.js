@@ -72,14 +72,15 @@ function createRequest (productNode) {
 }
 
 function merchantValidation (session, event) {
-	postJson('/merchant-validate', event)
-		.then(function (response) {
-			console.log(JSON.stringify(response));
-			session.completeMerchantValidation(response.session);
-		}, function (status) {
-			console.log(JSON.stringify(status));
-			session.abort();
-		});
+	postJson('merchant-validate', {
+		validationURL: event.validationURL
+	}).then(function (response) {
+		console.log(JSON.stringify(response));
+		session.completeMerchantValidation(response.session);
+	}, function (status) {
+		console.log(JSON.stringify(status));
+		session.abort();
+	});
 }
 
 jQuery(document).ready(function ($) {

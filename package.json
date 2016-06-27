@@ -15,7 +15,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.15.2",
+    "dotenv-safe": "^2.3.1",
     "express": "^4.14.0",
-    "forever": "^0.15.2"
+    "forever": "^0.15.2",
+    "request": "^2.72.0"
   }
 }
