@@ -102,13 +102,18 @@ textarea {
 
 .products {
 	align-items: center;
-	display: flex;
+	display: block;
 	width: 90%;
 	margin: 1rem auto;
 }
+@media only screen and (min-width: 35em) {
+	.products {
+		display: flex;
+	}
+}
 .product {
 	flex-basis: 25%;
-	padding: 0 .5rem;
+	padding: .5rem;
 }
 .product.product-highlight {
 	background-color: #d5d5d5;
