@@ -5,8 +5,8 @@ var bodyParser = require('body-parser');
 var app = express();
 var fs = require('fs');
 var path = require('path');
-var certFilePath = path.resolve(__dirname, '../merchant_id.cer');
-var keyFilePath = path.resolve(__dirname, '../applepay.key');
+var certFilePath = path.resolve(__dirname, './resources/applepaytls.pem');
+var keyFilePath = path.resolve(__dirname, './resources/applepaytls.key');
 
 app.use(bodyParser.json());
 app.post('/merchant-validate', function (req, res) {
