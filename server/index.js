@@ -17,9 +17,9 @@ app.post('/merchant-validate', function (req, res) {
 		url: req.body.validationURL,
 		json: true,
 		body: {
-			merchantId: process.env.MERCHANT_ID,
-			merchantName: process.env.MERCHANT_NAME,
-			merchantDomain: process.env.MERCHANT_DOMAIN
+			merchantIdentifier: process.env.MERCHANT_ID,
+			displayName: process.env.MERCHANT_NAME,
+			domainName: process.env.MERCHANT_DOMAIN
 		},
 		cert: fs.readFileSync(certFilePath),
 		key: fs.readFileSync(keyFilePath)
@@ -28,7 +28,6 @@ app.post('/merchant-validate', function (req, res) {
 			console.error(err);
 			return;
 		}
-		console.log(resp);
 		console.log(body);
 	});
 });
