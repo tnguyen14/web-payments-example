@@ -1,2 +1,5 @@
 node_modules
 .env
+applepay.csr
+applepay.key
+merchant_id.cer
