@@ -31,7 +31,10 @@ app.post('/merchant-validate', function (req, res) {
 		res.json({
 			merchantIdentifier: body.merchantIdentifier,
 			merchantSessionIdentifier: body.merchantSessionIdentifier,
-			nonce: body.nonce
+			nonce: body.nonce,
+			domainName: process.env.MERCHANT_DOMAIN,
+			epochTimestamp: body.epochTimestamp,
+			signature: body.signature
 		});
 	});
 });
