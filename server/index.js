@@ -28,7 +28,7 @@ app.post('/merchant-validate', function (req, res) {
 			console.error(err);
 			return;
 		}
-		console.log(body);
+		res.json(body);
 	});
 });
 

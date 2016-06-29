@@ -76,7 +76,7 @@ function merchantValidation (session, event) {
 		validationURL: event.validationURL
 	}).then(function (response) {
 		console.log(JSON.stringify(response));
-		session.completeMerchantValidation(response.session);
+		session.completeMerchantValidation(response);
 	}, function (status) {
 		console.log(JSON.stringify(status));
 		session.abort();
