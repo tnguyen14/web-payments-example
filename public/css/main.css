@@ -100,6 +100,10 @@ textarea {
    Author's custom styles
    ========================================================================== */
 
+.site-title {
+	text-align: center;
+}
+
 .products {
 	align-items: center;
 	display: block;
