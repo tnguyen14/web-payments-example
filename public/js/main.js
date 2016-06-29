@@ -57,16 +57,21 @@ function postJson (url, data) {
 // }
 
 function createRequest (productNode) {
+	var item = {
+		label: productNode.querySelector('h3').innerHTML,
+		amount: productNode.querySelector('.price').innerHTML
+			.replace('$', '')
+	}
 	return {
 		countryCode: 'US',
 		currencyCode: 'USD',
 		supportedNetworks: ['amex', 'visa', 'masterCard', 'discover'],
 		merchantCapabilities: ['supports3DS'],
 		requiredShippingAddressFields: ['postalAddress'],
+		lineItems: [item],
 		total: {
-			label: productNode.querySelector('h3').innerHTML,
-			amount: productNode.querySelector('.price').innerHTML
-				.replace('$', '')
+			label: 'Apple Pay Web Example',
+			amount: item.amount
 		}
 	};
 }
