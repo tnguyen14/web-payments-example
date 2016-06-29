@@ -88,6 +88,11 @@ function merchantValidation (session, event) {
 	});
 }
 
+function authorizePayment (session, event) {
+	console.log(event);
+	session.completePayment(ApplePaySession.STATUS_SUCCESS);
+}
+
 jQuery(document).ready(function ($) {
 	var applePayButtons = document.querySelectorAll('.apple-pay');
 	Array.prototype.forEach.call(applePayButtons, function (button) {
@@ -97,6 +102,7 @@ jQuery(document).ready(function ($) {
 			var session = new ApplePaySession(1, request);
 			session.begin();
 			session.onvalidatemerchant = merchantValidation.bind(window, session);
+			session.onpaymentauthorized = authorizePayment.bind(window, session);
 		});
 	});
 });
