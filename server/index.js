@@ -28,7 +28,11 @@ app.post('/merchant-validate', function (req, res) {
 			console.error(err);
 			return;
 		}
-		res.json(body);
+		res.json({
+			merchantIdentifier: body.merchantIdentifier,
+			merchantSessionIdentifier: body.merchantSessionIdentifier,
+			nonce: body.nonce
+		});
 	});
 });
 
