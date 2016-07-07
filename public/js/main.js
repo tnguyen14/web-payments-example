@@ -89,8 +89,14 @@ function merchantValidation (session, event) {
 	});
 }
 
-function shippingContactSelected (session, event) {
-	console.log(event);
+function shippingContactSelected (session, request, event) {
+	console.log(event.shippingContact);
+	session.completeShippingContactSelection(ApplePaySession.STATUS_SUCCESS, [{
+		label: 'Ground',
+		detail: 'USPS Ground',
+		amount: '5.99',
+		identifier: 'usps-ground'
+	}], request.total, request.lineItems);
 }
 
 function authorizePayment (session, event) {
@@ -103,6 +109,11 @@ function paymentMethodSelected (session, request, event) {
 	session.completePaymentMethodSelection(request.total, request.lineItems);
 }
 
+function shippingMethodSelected (session, request, event) {
+	console.log(event.shippingMethod);
+	session.completePayment(ApplePaySession.STATUS_SUCCESS, request.total, request.lineItems);
+}
+
 jQuery(document).ready(function ($) {
 	var applePayButtons = document.querySelectorAll('.apple-pay');
 	Array.prototype.forEach.call(applePayButtons, function (button) {
@@ -112,8 +123,9 @@ jQuery(document).ready(function ($) {
 			var session = new ApplePaySession(1, request);
 			session.onvalidatemerchant = merchantValidation.bind(window, session);
 			session.onpaymentauthorized = authorizePayment.bind(window, session);
-			session.onshippingcontactselected = shippingContactSelected.bind(window, session);
+			session.onshippingcontactselected = shippingContactSelected.bind(window, session, request);
 			session.onpaymentmethodselected = paymentMethodSelected.bind(window, session, request);
+			session.onshippingmethodselected = shippingMethodSelected.bind(window, session, request);
 			session.begin();
 		});
 	});
