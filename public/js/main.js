@@ -110,11 +110,11 @@ jQuery(document).ready(function ($) {
 			e.preventDefault();
 			var request = createRequest(e.target.parentNode);
 			var session = new ApplePaySession(1, request);
-			session.begin();
 			session.onvalidatemerchant = merchantValidation.bind(window, session);
 			session.onpaymentauthorized = authorizePayment.bind(window, session);
 			session.onshippingcontactselected = shippingContactSelected.bind(window, session);
 			session.onpaymentmethodselected = paymentMethodSelected.bind(window, session, request);
+			session.begin();
 		});
 	});
 });
