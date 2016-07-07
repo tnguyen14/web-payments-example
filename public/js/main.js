@@ -67,7 +67,8 @@ function createRequest (productNode) {
 		currencyCode: 'USD',
 		supportedNetworks: ['amex', 'visa', 'masterCard', 'discover'],
 		merchantCapabilities: ['supports3DS'],
-		requiredShippingAddressFields: ['postalAddress'],
+		requiredShippingAddressFields: ['postalAddress', 'name'],
+		// requiredBillingAddressFields: ['postalAddress'],
 		lineItems: [item],
 		total: {
 			label: 'Apple Pay Web Example',
@@ -88,6 +89,10 @@ function merchantValidation (session, event) {
 	});
 }
 
+function shippingContactSelected (session, event) {
+	console.log(event);
+}
+
 function authorizePayment (session, event) {
 	console.log(event);
 	session.completePayment(ApplePaySession.STATUS_SUCCESS);
@@ -103,6 +108,7 @@ jQuery(document).ready(function ($) {
 			session.begin();
 			session.onvalidatemerchant = merchantValidation.bind(window, session);
 			session.onpaymentauthorized = authorizePayment.bind(window, session);
+			session.onshippingcontactselected = shippingContactSelected.bind(window, session);
 		});
 	});
 });
