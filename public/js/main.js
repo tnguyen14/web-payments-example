@@ -89,14 +89,38 @@ function validateMerchant (session, event) {
 	});
 }
 
+function calculateTotalWithShipping (request, shippingMethod) {
+	var lineItems = request.lineItems.concat({
+		label: shippingMethod.label,
+		amount: shippingMethod.amount
+	});
+	var totalAmount = lineItems.reduce(function (total, item) {
+		return total += parseFloat(item.amount);
+	}, 0);
+	var total = Object.assign({}, request.total, {
+		amount: totalAmount.toString()
+	});
+	return {
+		lineItems: lineItems,
+		total: total
+	};
+}
+
 function shippingContactSelected (session, request, event) {
 	console.log(event.shippingContact);
-	session.completeShippingContactSelection(ApplePaySession.STATUS_SUCCESS, [{
-		label: 'Ground',
-		detail: 'USPS Ground',
+	var shippingMethods = [{
+		label: 'Priority Shipping',
+		detail: 'USPS Priority Shipping',
 		amount: '5.99',
-		identifier: 'usps-ground'
-	}], request.total, request.lineItems);
+		identifier: 'usps-priority'
+	}, {
+		label: '2 Day Shipping',
+		detail: '2 Day Shipping - arrives on ' + new Date(Date.now() + 1000 * 60 * 60 * 24 * 2).toLocaleDateString(),
+		amount: '8.99',
+		identifier: '2-day'
+	}];
+	var updatedRequest = calculateTotalWithShipping(request, shippingMethods[0]);
+	session.completeShippingContactSelection(ApplePaySession.STATUS_SUCCESS, shippingMethods, updatedRequest.total, updatedRequest.lineItems);
 }
 
 function paymentAuthorized (session, event) {
@@ -112,7 +136,8 @@ function paymentMethodSelected (session, request, event) {
 
 function shippingMethodSelected (session, request, event) {
 	console.log(event.shippingMethod);
-	session.completePayment(ApplePaySession.STATUS_SUCCESS, request.total, request.lineItems);
+	var updatedRequest = calculateTotalWithShipping(request, event.shippingMethod);
+	session.completeShippingMethodSelection(ApplePaySession.STATUS_SUCCESS, updatedRequest.total, updatedRequest.lineItems);
 }
 
 jQuery(document).ready(function ($) {
