@@ -86,8 +86,8 @@ textarea {
 }
 
 /* ==========================================================================
-   Browser Upgrade Prompt
-   ========================================================================== */
+ Browser Upgrade Prompt
+ ========================================================================== */
 
 .browserupgrade {
 	margin: 0.2em 0;
@@ -97,8 +97,8 @@ textarea {
 }
 
 /* ==========================================================================
-   Author's custom styles
-   ========================================================================== */
+ Author's custom styles
+ ========================================================================== */
 
 .site-title {
 	text-align: center;
@@ -159,7 +159,9 @@ textarea {
 	border-color: black;
 }
 
-
+.order-confirmation {
+	text-align: center;
+}
 
 /* ==========================================================================
    Helper classes
@@ -246,9 +248,9 @@ textarea {
 }
 
 @media print,
-	   (-webkit-min-device-pixel-ratio: 1.25),
-	   (min-resolution: 1.25dppx),
-	   (min-resolution: 120dpi) {
+		(-webkit-min-device-pixel-ratio: 1.25),
+		(min-resolution: 1.25dppx),
+		(min-resolution: 120dpi) {
 	/* Style adjustments for high resolution devices */
 }
 
@@ -266,7 +268,7 @@ textarea {
 	*:first-line {
 		background: transparent !important;
 		color: #000 !important; /* Black prints faster:
-								   http://www.sanbeiji.com/archives/953 */
+								http://www.sanbeiji.com/archives/953 */
 		box-shadow: none !important;
 		text-shadow: none !important;
 	}

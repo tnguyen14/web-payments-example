@@ -102,6 +102,7 @@ function shippingContactSelected (session, request, event) {
 function paymentAuthorized (session, event) {
 	console.log(event);
 	session.completePayment(ApplePaySession.STATUS_SUCCESS);
+	window.location = 'order-confirmation.html';
 }
 
 function paymentMethodSelected (session, request, event) {
