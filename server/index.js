@@ -28,7 +28,7 @@ app.post('/merchant-validate', function (req, res) {
 			console.error(err);
 			return;
 		}
-		console.log(body);
+		console.log('Session validation received.');
 		res.json({
 			merchantIdentifier: body.merchantIdentifier,
 			merchantSessionIdentifier: body.merchantSessionIdentifier,
