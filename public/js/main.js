@@ -77,7 +77,7 @@ function createRequest (productNode) {
 	};
 }
 
-function merchantValidation (session, event) {
+function validateMerchant (session, event) {
 	postJson('merchant-validate', {
 		validationURL: event.validationURL
 	}).then(function (response) {
@@ -99,7 +99,7 @@ function shippingContactSelected (session, request, event) {
 	}], request.total, request.lineItems);
 }
 
-function authorizePayment (session, event) {
+function paymentAuthorized (session, event) {
 	console.log(event);
 	session.completePayment(ApplePaySession.STATUS_SUCCESS);
 }
@@ -121,8 +121,8 @@ jQuery(document).ready(function ($) {
 			e.preventDefault();
 			var request = createRequest(e.target.parentNode);
 			var session = new ApplePaySession(1, request);
-			session.onvalidatemerchant = merchantValidation.bind(window, session);
-			session.onpaymentauthorized = authorizePayment.bind(window, session);
+			session.onvalidatemerchant = validateMerchant.bind(window, session);
+			session.onpaymentauthorized = paymentAuthorized.bind(window, session);
 			session.onshippingcontactselected = shippingContactSelected.bind(window, session, request);
 			session.onpaymentmethodselected = paymentMethodSelected.bind(window, session, request);
 			session.onshippingmethodselected = shippingMethodSelected.bind(window, session, request);
