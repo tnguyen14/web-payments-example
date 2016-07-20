@@ -2,11 +2,19 @@ require('dotenv-safe').load();
 var request = require('request');
 var express = require('express');
 var bodyParser = require('body-parser');
+var cors = require('cors');
 var app = express();
 var fs = require('fs');
 var path = require('path');
 var certFilePath = path.resolve(__dirname, './resources/applepaytls.pem');
 var keyFilePath = path.resolve(__dirname, './resources/applepaytls.key');
+
+var authorizedOrigins = process.env.AUTHORIZED_ORIGINS.split(',');
+app.use(cors({
+	origin: function (origin, callback) {
+		callback(null, authorizedOrigins.indexOf(origin) !== -1);
+	}
+}));
 
 app.use(bodyParser.json());
 app.post('/merchant-validate', function (req, res) {
