@@ -4,6 +4,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var cors = require('cors');
 var app = express();
+var debug = require('debug')('apple-pay');
 var fs = require('fs');
 var path = require('path');
 var certFilePath = path.resolve(__dirname, './resources/applepaytls.pem');
@@ -33,10 +34,14 @@ app.post('/merchant-validate', function (req, res) {
 		key: fs.readFileSync(keyFilePath)
 	}, function (err, resp, body) {
 		if (err) {
-			console.error(err);
+			debug(err);
 			return;
 		}
-		console.log('Session validation received.');
+		if (body.statusCode === 400) {
+			debug(body);
+			return;
+		}
+		debug('Session validation received.');
 		res.json({
 			merchantIdentifier: body.merchantIdentifier,
 			merchantSessionIdentifier: body.merchantSessionIdentifier,
@@ -51,5 +56,5 @@ app.post('/merchant-validate', function (req, res) {
 app.use(express.static('public'));
 
 app.listen(process.env.PORT || 3000, function () {
-	console.log('Express is listening.');
+	debug('Express is listening.');
 });
