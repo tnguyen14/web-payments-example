@@ -140,6 +140,10 @@ function shippingMethodSelected (session, request, event) {
 	session.completeShippingMethodSelection(ApplePaySession.STATUS_SUCCESS, updatedRequest.total, updatedRequest.lineItems);
 }
 
+function cancel (session, event) {
+	console.log(event);
+}
+
 jQuery(document).ready(function ($) {
 	var applePayButtons = document.querySelectorAll('.apple-pay');
 	Array.prototype.forEach.call(applePayButtons, function (button) {
@@ -152,6 +156,7 @@ jQuery(document).ready(function ($) {
 			session.onshippingcontactselected = shippingContactSelected.bind(window, session, request);
 			session.onpaymentmethodselected = paymentMethodSelected.bind(window, session, request);
 			session.onshippingmethodselected = shippingMethodSelected.bind(window, session, request);
+			session.oncancel = cancel.bind(window, session);
 			session.begin();
 		});
 	});
