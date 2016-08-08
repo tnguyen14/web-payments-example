@@ -56,6 +56,32 @@ app.post('/merchant-validate', function (req, res) {
 	});
 });
 
+app.post('/merchant-register', function (req, res) {
+	if (!req.body.domainNames || !req.body.partnerMerchantName || !req.body.encryptTo || !req.body.partnerInternalMerchantIdentifier) {
+		return res.status(400).send('Missing registration parameters');
+	}
+	request.post({
+		url: process.env.MERCHANT_REGISTER_URL,
+		json: true,
+		body: {
+			domainNames: [process.env.MERCHANT_DOMAIN],
+			partnerMerchantName: process.env.MERCHANT_NAME,
+			partnerInternalMerchantIdentifier: process.env.MERCHANT_ID,
+			encryptTo: process.env.MERCHANT_ID
+		},
+		cert: fs.readFileSync(certFilePath),
+		key: fs.readFileSync(keyFilePath)
+	}, function (err, resp, body) {
+		if (err) {
+			console.error(err);
+			return;
+		}
+		res.json({
+			status: 'OK'
+		});
+	});
+});
+
 app.use(express.static('public'));
 
 app.listen(process.env.PORT || 3000, function () {
