@@ -1,12 +1,12 @@
 /* global jQuery, fetch, ApplePaySession */
 var STATUSES = {
-	'Failure': ApplePaySession.STATUS_FAILURE,
-	'InvalidBillingPostalAddress': ApplePaySession.STATUS_INVALID_BILLING_POSTAL_ADDRESS,
-	'InvalidShippingPostalAddress': ApplePaySession.STATUS_INVALID_SHIPPING_POSTAL_ADDRESS,
-	'InvalidShippingContact': ApplePaySession.STATUS_INVALID_SHIPPING_CONTACT,
-	'PINRequired': ApplePaySession.STATUS_PIN_REQUIRED,
-	'PINIncorrect': ApplePaySession.STATUS_PIN_INCORRECT,
-	'PINLockout': ApplePaySession.STATUS_PIN_LOCKOUT
+	Failure: ApplePaySession.STATUS_FAILURE,
+	InvalidBillingPostalAddress: ApplePaySession.STATUS_INVALID_BILLING_POSTAL_ADDRESS,
+	InvalidShippingPostalAddress: ApplePaySession.STATUS_INVALID_SHIPPING_POSTAL_ADDRESS,
+	InvalidShippingContact: ApplePaySession.STATUS_INVALID_SHIPPING_CONTACT,
+	PINRequired: ApplePaySession.STATUS_PIN_REQUIRED,
+	PINIncorrect: ApplePaySession.STATUS_PIN_INCORRECT,
+	PINLockout: ApplePaySession.STATUS_PIN_LOCKOUT
 };
 
 function mapStatus (status) {
@@ -67,8 +67,8 @@ function createRequest (productNode) {
 		currencyCode: 'USD',
 		supportedNetworks: ['amex', 'visa', 'masterCard', 'discover'],
 		merchantCapabilities: ['supports3DS'],
-		requiredShippingContactFields: ['postalAddress', 'name'],
-		// requiredBillingContactFields: ['postalAddress'],
+		requiredShippingContactFields: ['postalAddress', 'name', 'email', 'phone'],
+		requiredBillingContactFields: ['postalAddress', 'name'],
 		lineItems: [item],
 		total: {
 			label: 'Apple Pay Web Example',
