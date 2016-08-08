@@ -35,10 +35,12 @@ app.post('/merchant-validate', function (req, res) {
 	}, function (err, resp, body) {
 		if (err) {
 			debug(err);
+			res.sendStatus(500);
 			return;
 		}
-		if (body.statusCode === 400) {
+		if (body.statusCode === '400' || body.statusCode === '500') {
 			debug(body);
+			res.status(400).json(body);
 			return;
 		}
 		debug('Session validation received.');
@@ -48,7 +50,8 @@ app.post('/merchant-validate', function (req, res) {
 			nonce: body.nonce,
 			domainName: process.env.MERCHANT_DOMAIN,
 			epochTimestamp: body.epochTimestamp,
-			signature: body.signature
+			signature: body.signature,
+			displayName: body.displayName
 		});
 	});
 });
