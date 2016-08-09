@@ -123,10 +123,16 @@ function shippingContactSelected (session, request, event) {
 	session.completeShippingContactSelection(ApplePaySession.STATUS_SUCCESS, shippingMethods, updatedRequest.total, updatedRequest.lineItems);
 }
 
-function paymentAuthorized (session, event) {
+function paymentAuthorized (session, request, event) {
 	console.log(event);
-	session.completePayment(ApplePaySession.STATUS_SUCCESS);
-	window.location = 'order-confirmation.html';
+	postJson('payment-authorize', {
+		payment: event.payment,
+		amount: request.total.amount
+	}).then(function (response) {
+		console.log(response);
+		session.completePayment(ApplePaySession.STATUS_SUCCESS);
+		window.location = 'order-confirmation.html';
+	});
 }
 
 function paymentMethodSelected (session, request, event) {
@@ -152,7 +158,7 @@ jQuery(document).ready(function ($) {
 			var request = createRequest(e.target.parentNode);
 			var session = new ApplePaySession(1, request);
 			session.onvalidatemerchant = validateMerchant.bind(window, session);
-			session.onpaymentauthorized = paymentAuthorized.bind(window, session);
+			session.onpaymentauthorized = paymentAuthorized.bind(window, session, request);
 			session.onshippingcontactselected = shippingContactSelected.bind(window, session, request);
 			session.onpaymentmethodselected = paymentMethodSelected.bind(window, session, request);
 			session.onshippingmethodselected = shippingMethodSelected.bind(window, session, request);
