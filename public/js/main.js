@@ -68,12 +68,15 @@ function postJson (url, data) {
 // 	}).then(handleResponse);
 // }
 
-function createRequest (productNode) {
-	var item = {
+function getProductDetails (productNode) {
+	return {
 		label: productNode.querySelector('h3').innerHTML,
 		amount: productNode.querySelector('.price').innerHTML
 			.replace('$', '')
-	};
+	}
+}
+
+function createApplePayRequest (product) {
 	return {
 		countryCode: 'US',
 		currencyCode: 'USD',
@@ -81,10 +84,10 @@ function createRequest (productNode) {
 		merchantCapabilities: ['supports3DS'],
 		requiredShippingContactFields: ['postalAddress', 'name', 'email', 'phone'],
 		requiredBillingContactFields: ['postalAddress', 'name'],
-		lineItems: [item],
+		lineItems: [product],
 		total: {
 			label: 'Apple Pay Web Example',
-			amount: item.amount
+			amount: product.amount
 		}
 	};
 }
@@ -156,7 +159,7 @@ jQuery(document).ready(function ($) {
 	Array.prototype.forEach.call(applePayButtons, function (button) {
 		button.addEventListener('click', function (e) {
 			e.preventDefault();
-			var request = createRequest(e.target.parentNode.parentNode);
+			var request = createApplePayRequest(getProductDetails(e.target.parentNode.parentNode));
 			var session = new ApplePaySession(1, request);
 			session.onvalidatemerchant = validateMerchant.bind(window, session);
 			session.onpaymentauthorized = paymentAuthorized.bind(window, session, request);
