@@ -9,6 +9,18 @@ var STATUSES = {
 	PINLockout: ApplePaySession.STATUS_PIN_LOCKOUT
 };
 
+var shippingMethods = [{
+	label: 'Priority Shipping',
+	detail: 'USPS Priority Shipping',
+	amount: '5.99',
+	identifier: 'usps-priority'
+}, {
+	label: '2 Day Shipping',
+	detail: '2 Day Shipping - arrives on ' + new Date(Date.now() + 1000 * 60 * 60 * 24 * 2).toLocaleDateString(),
+	amount: '8.99',
+	identifier: '2-day'
+}];
+
 function mapStatus (status) {
 	if (status && STATUSES[status]) {
 		return STATUSES[status];
@@ -108,17 +120,6 @@ function calculateTotalWithShipping (request, shippingMethod) {
 
 function shippingContactSelected (session, request, event) {
 	console.log(event.shippingContact);
-	var shippingMethods = [{
-		label: 'Priority Shipping',
-		detail: 'USPS Priority Shipping',
-		amount: '5.99',
-		identifier: 'usps-priority'
-	}, {
-		label: '2 Day Shipping',
-		detail: '2 Day Shipping - arrives on ' + new Date(Date.now() + 1000 * 60 * 60 * 24 * 2).toLocaleDateString(),
-		amount: '8.99',
-		identifier: '2-day'
-	}];
 	var updatedRequest = calculateTotalWithShipping(request, shippingMethods[0]);
 	session.completeShippingContactSelection(ApplePaySession.STATUS_SUCCESS, shippingMethods, updatedRequest.total, updatedRequest.lineItems);
 }

@@ -15,6 +15,7 @@ function authorize (req, res) {
 		json: true,
 		body: {
 			merchant_account_id: process.env.PSP_MERCHANT_ACCOUNT_ID,
+			order_no: '0000001', // test order no
 			payment: {
 				payment_id: '089e4cd378bff63d9d7bd63f8f', // test UUID
 				type: 'ApplePay',
