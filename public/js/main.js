@@ -1,13 +1,17 @@
 /* global jQuery, fetch, ApplePaySession */
-var STATUSES = {
-	Failure: ApplePaySession.STATUS_FAILURE,
-	InvalidBillingPostalAddress: ApplePaySession.STATUS_INVALID_BILLING_POSTAL_ADDRESS,
-	InvalidShippingPostalAddress: ApplePaySession.STATUS_INVALID_SHIPPING_POSTAL_ADDRESS,
-	InvalidShippingContact: ApplePaySession.STATUS_INVALID_SHIPPING_CONTACT,
-	PINRequired: ApplePaySession.STATUS_PIN_REQUIRED,
-	PINIncorrect: ApplePaySession.STATUS_PIN_INCORRECT,
-	PINLockout: ApplePaySession.STATUS_PIN_LOCKOUT
-};
+if (window.ApplePaySession) {
+	var STATUSES = {
+		Failure: ApplePaySession.STATUS_FAILURE,
+		InvalidBillingPostalAddress: ApplePaySession.STATUS_INVALID_BILLING_POSTAL_ADDRESS,
+		InvalidShippingPostalAddress: ApplePaySession.STATUS_INVALID_SHIPPING_POSTAL_ADDRESS,
+		InvalidShippingContact: ApplePaySession.STATUS_INVALID_SHIPPING_CONTACT,
+		PINRequired: ApplePaySession.STATUS_PIN_REQUIRED,
+		PINIncorrect: ApplePaySession.STATUS_PIN_INCORRECT,
+		PINLockout: ApplePaySession.STATUS_PIN_LOCKOUT
+	};
+}
+
+var currencyCode = 'USD';
 
 var shippingMethods = [{
 	label: 'Priority Shipping',
@@ -79,7 +83,7 @@ function getProductDetails (productNode) {
 function createApplePayRequest (product) {
 	return {
 		countryCode: 'US',
-		currencyCode: 'USD',
+		currencyCode: currencyCode,
 		supportedNetworks: ['amex', 'visa', 'masterCard', 'discover'],
 		merchantCapabilities: ['supports3DS'],
 		requiredShippingContactFields: ['postalAddress', 'name', 'email', 'phone'],
@@ -89,6 +93,49 @@ function createApplePayRequest (product) {
 			label: 'Apple Pay Web Example',
 			amount: product.amount
 		}
+	};
+}
+
+function createPaymentRequest (product) {
+	var methodData = [{
+		supportedMethods: ['visa', 'mastercard', 'amex']
+	}, {
+		supportedMethods: ['https://android.com/pay'],
+		data: {
+			environment: 'TEST',
+			paymentMethodTokenizationParameters: {
+				tokenizationType: 'NETWORK_TOKEN',
+				parameters: {
+					publicKey: 'BO39Rh43UGXMQy5PAWWe7UGWd2a9YRjNLPEEVe+zWIbdIgALcDcnYCuHbmrrzl7h8FZjl6RCzoi5/cDrqXNRVSo='
+				}
+			}
+		}
+	}];
+	var details = {
+		total: {
+			label: 'Total',
+			amount: {
+				currency: currencyCode,
+				value: product.amount
+			}
+		},
+		displayItems: [{
+			label: product.label,
+			amount: {
+				currency: currencyCode,
+				value: product.amount
+			}
+		}]
+	};
+	 var options = {
+		 requestShipping: true,
+		 requestPayerEmail: true,
+		 requestPayerPhone: true
+	};
+	return {
+		methodData: methodData,
+		details: details,
+		options: options
 	};
 }
 
@@ -154,10 +201,56 @@ function cancel (session, event) {
 	console.log(event);
 }
 
+function shippingAddressChange (request, details, event) {
+	console.log(request.shippingAddress);
+	event.updateWith(Promise.resolve(Object.assign({}, details, {
+		shippingOptions: shippingMethods.map(function (method) {
+			return {
+				id: method.identifier,
+				label: method.label,
+				amount: {
+					currency: currencyCode,
+					value: method.amount
+				}
+			};
+		})
+	})));
+}
+
+function shippingOptionChange (request, details, event) {
+	console.log(request.shippingOption);
+	var selectedShippingOption = shippingMethods.find(function (method) {
+		return method.identifier === request.shippingOption;
+	});
+	event.updateWith(Promise.resolve(Object.assign({}, details, {
+		total: {
+			label: 'Total',
+			amount: {
+				currency: currencyCode,
+				value: Number(details.total.amount.value) + Number(selectedShippingOption.amount)
+			}
+		},
+		shippingOptions: shippingMethods.map(function (method) {
+			return {
+				id: method.identifier,
+				label: method.label,
+				amount: {
+					currency: currencyCode,
+					value: method.amount
+				},
+				selected: (method.identifier === request.shippingOption)
+			};
+		})
+	})))
+}
+
 jQuery(document).ready(function ($) {
 	var applePayButtons = document.querySelectorAll('.apple-pay');
 	Array.prototype.forEach.call(applePayButtons, function (button) {
 		button.addEventListener('click', function (e) {
+			if (!window.ApplePaySession) {
+				return;
+			}
 			e.preventDefault();
 			var request = createApplePayRequest(getProductDetails(e.target.parentNode.parentNode));
 			var session = new ApplePaySession(1, request);
@@ -170,4 +263,22 @@ jQuery(document).ready(function ($) {
 			session.begin();
 		});
 	});
+	var buyNowButtons = document.querySelectorAll('.buy-now');
+	Array.prototype.forEach.call(buyNowButtons, function (button) {
+		button.addEventListener('click', function (e) {
+			e.preventDefault();
+			if (!window.PaymentRequest) {
+				return;
+			}
+			var requestData = createPaymentRequest(getProductDetails(e.target.parentNode.parentNode));
+			var request = new PaymentRequest(requestData.methodData, requestData.details, requestData.options);
+			request.addEventListener('shippingaddresschange', shippingAddressChange.bind(window, request, requestData.details));
+			request.addEventListener('shippingoptionchange', shippingOptionChange.bind(window, request, requestData.details));
+			request.show()
+				.then(function (instrument) {
+					console.log(instrument);
+					instrument.complete();
+				});
+		});
+	})
 });
