@@ -100,6 +100,10 @@ textarea {
  Author's custom styles
  ========================================================================== */
 
+body {
+	background: #f1f1f1;
+}
+
 .site-title {
 	text-align: center;
 }
@@ -110,14 +114,25 @@ textarea {
 	width: 90%;
 	margin: 1rem auto;
 }
-@media only screen and (min-width: 35em) {
+@media only screen and (min-width: 50em) {
 	.products {
 		display: flex;
 	}
 }
 .product {
+	background: #fff;
+	box-shadow: 1px 1px 2px rgba(0,0,0,0.2);
 	flex-basis: 25%;
-	padding: .5rem;
+	margin: 1rem;
+	padding-bottom: 1rem;
+}
+@media only screen and (min-width: 50em) {
+	.product {
+		margin: .5rem;
+	}
+}
+.product:hover {
+	box-shadow: 0 0 10px 4px rgba(0,0,0,0.2);
 }
 .product.product-highlight {
 	background-color: #d5d5d5;
@@ -127,25 +142,32 @@ textarea {
 	height: auto;
 }
 .product h3 {
-	text-align: center;
+	float: left;
+	margin:1.5rem 0 1rem 8%;
 }
 .product .price {
-	margin-bottom: 1rem;
-	text-align: center;
+	float: right;
+	margin: 1.5rem 8% 1rem 0;
 }
 .product button {
+	border-radius: 5px;
+	background-color: #e7e7e7;
+	border: none;
 	display: block;
-	margin: 0 auto .3rem;
-	width: 150px;
+	float: left;
+	margin: .3rem 0 .3rem 6%;
+	width: 41%;
 	height: 50px;
 }
+.product-highlight button {
+	background-color: #fff;
+}
 
-.apple-pay {
+button.apple-pay {
 	background-size: 100% 60%;
 	background-position: center;
 	background-repeat: no-repeat;
 	border: 1px solid transparent;
-	border-radius: 5px;
 }
 .apple-pay.white {
 	background-image: -webkit-named-image(apple-pay-logo-black);

@@ -156,7 +156,7 @@ jQuery(document).ready(function ($) {
 	Array.prototype.forEach.call(applePayButtons, function (button) {
 		button.addEventListener('click', function (e) {
 			e.preventDefault();
-			var request = createRequest(e.target.parentNode);
+			var request = createRequest(e.target.parentNode.parentNode);
 			var session = new ApplePaySession(1, request);
 			session.onvalidatemerchant = validateMerchant.bind(window, session);
 			session.onpaymentauthorized = paymentAuthorized.bind(window, session, request);
