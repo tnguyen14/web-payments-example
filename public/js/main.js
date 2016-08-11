@@ -12,6 +12,7 @@ if (window.ApplePaySession) {
 }
 
 var currencyCode = 'USD';
+var totalLabel = 'Total';
 
 var shippingMethods = [{
 	label: 'Priority Shipping',
@@ -80,7 +81,7 @@ function getProductDetails (productNode) {
 	}
 }
 
-function createApplePayRequest (product) {
+function createPaymentRequestApplePay (product) {
 	return {
 		countryCode: 'US',
 		currencyCode: currencyCode,
@@ -94,6 +95,68 @@ function createApplePayRequest (product) {
 			amount: product.amount
 		}
 	};
+}
+
+function validateMerchant (session, event) {
+	postJson('merchant-validate', {
+		validationURL: event.validationURL
+	}).then(function (response) {
+		console.log(JSON.stringify(response));
+		session.completeMerchantValidation(response);
+	}, function (status) {
+		console.log(JSON.stringify(status));
+		session.abort();
+	});
+}
+
+function selectShippingMethod (request, shippingMethod) {
+	var lineItems = request.lineItems.concat({
+		label: shippingMethod.label,
+		amount: shippingMethod.amount
+	});
+	var totalAmount = lineItems.reduce(function (total, item) {
+		return total += parseFloat(item.amount);
+	}, 0);
+	var total = Object.assign({}, request.total, {
+		amount: totalAmount.toString()
+	});
+	return {
+		lineItems: lineItems,
+		total: total
+	};
+}
+
+function shippingContactSelected (session, request, event) {
+	console.log(event.shippingContact);
+	var updatedRequest = selectShippingMethod(request, shippingMethods[0]);
+	session.completeShippingContactSelection(ApplePaySession.STATUS_SUCCESS, shippingMethods, updatedRequest.total, updatedRequest.lineItems);
+}
+
+function paymentAuthorized (session, request, event) {
+	console.log(event);
+	postJson('payment-authorize', {
+		payment: event.payment,
+		amount: request.total.amount
+	}).then(function (response) {
+		console.log(response);
+		session.completePayment(ApplePaySession.STATUS_SUCCESS);
+		window.location = 'order-confirmation.html';
+	});
+}
+
+function paymentMethodSelected (session, request, event) {
+	console.log(event.paymentMethod);
+	session.completePaymentMethodSelection(request.total, request.lineItems);
+}
+
+function shippingMethodSelected (session, request, event) {
+	console.log(event.shippingMethod);
+	var updatedRequest = selectShippingMethod(request, event.shippingMethod);
+	session.completeShippingMethodSelection(ApplePaySession.STATUS_SUCCESS, updatedRequest.total, updatedRequest.lineItems);
+}
+
+function cancel (session, event) {
+	console.log(event);
 }
 
 function createPaymentRequest (product) {
@@ -113,7 +176,7 @@ function createPaymentRequest (product) {
 	}];
 	var details = {
 		total: {
-			label: 'Total',
+			label: totalLabel,
 			amount: {
 				currency: currencyCode,
 				value: product.amount
@@ -139,109 +202,44 @@ function createPaymentRequest (product) {
 	};
 }
 
-function validateMerchant (session, event) {
-	postJson('merchant-validate', {
-		validationURL: event.validationURL
-	}).then(function (response) {
-		console.log(JSON.stringify(response));
-		session.completeMerchantValidation(response);
-	}, function (status) {
-		console.log(JSON.stringify(status));
-		session.abort();
+function selectShippingOption (details, option) {
+	var selectedShippingMethod;
+	shippingMethods.forEach(function (method) {
+		if (method.identifier === option) {
+			selectedShippingMethod = method;
+		}
 	});
-}
-
-function calculateTotalWithShipping (request, shippingMethod) {
-	var lineItems = request.lineItems.concat({
-		label: shippingMethod.label,
-		amount: shippingMethod.amount
-	});
-	var totalAmount = lineItems.reduce(function (total, item) {
-		return total += parseFloat(item.amount);
-	}, 0);
-	var total = Object.assign({}, request.total, {
-		amount: totalAmount.toString()
-	});
-	return {
-		lineItems: lineItems,
-		total: total
-	};
-}
-
-function shippingContactSelected (session, request, event) {
-	console.log(event.shippingContact);
-	var updatedRequest = calculateTotalWithShipping(request, shippingMethods[0]);
-	session.completeShippingContactSelection(ApplePaySession.STATUS_SUCCESS, shippingMethods, updatedRequest.total, updatedRequest.lineItems);
-}
-
-function paymentAuthorized (session, request, event) {
-	console.log(event);
-	postJson('payment-authorize', {
-		payment: event.payment,
-		amount: request.total.amount
-	}).then(function (response) {
-		console.log(response);
-		session.completePayment(ApplePaySession.STATUS_SUCCESS);
-		window.location = 'order-confirmation.html';
-	});
-}
-
-function paymentMethodSelected (session, request, event) {
-	console.log(event.paymentMethod);
-	session.completePaymentMethodSelection(request.total, request.lineItems);
-}
-
-function shippingMethodSelected (session, request, event) {
-	console.log(event.shippingMethod);
-	var updatedRequest = calculateTotalWithShipping(request, event.shippingMethod);
-	session.completeShippingMethodSelection(ApplePaySession.STATUS_SUCCESS, updatedRequest.total, updatedRequest.lineItems);
-}
-
-function cancel (session, event) {
-	console.log(event);
-}
-
-function shippingAddressChange (request, details, event) {
-	console.log(request.shippingAddress);
-	event.updateWith(Promise.resolve(Object.assign({}, details, {
+	return Object.assign({}, details, {
 		shippingOptions: shippingMethods.map(function (method) {
 			return {
 				id: method.identifier,
-				label: method.label,
-				amount: {
-					currency: currencyCode,
-					value: method.amount
-				}
-			};
-		})
-	})));
-}
-
-function shippingOptionChange (request, details, event) {
-	console.log(request.shippingOption);
-	var selectedShippingOption = shippingMethods.find(function (method) {
-		return method.identifier === request.shippingOption;
-	});
-	event.updateWith(Promise.resolve(Object.assign({}, details, {
-		total: {
-			label: 'Total',
-			amount: {
-				currency: currencyCode,
-				value: Number(details.total.amount.value) + Number(selectedShippingOption.amount)
-			}
-		},
-		shippingOptions: shippingMethods.map(function (method) {
-			return {
-				id: method.identifier,
-				label: method.label,
+				label: method.detail,
 				amount: {
 					currency: currencyCode,
 					value: method.amount
 				},
-				selected: (method.identifier === request.shippingOption)
-			};
-		})
-	})))
+				selected: (method.identifier === option)
+			}
+		}),
+		total: {
+			label: totalLabel,
+			amount: {
+				currency: currencyCode,
+				value: (Number(details.total.amount.value) + Number(selectedShippingMethod.amount)).toString()
+			}
+		}
+	})
+}
+
+function shippingAddressChange (request, details, event) {
+	console.log(request.shippingAddress);
+	// select the first shipping method by default
+	event.updateWith(Promise.resolve(selectShippingOption(details, shippingMethods[0].identifier)));
+}
+
+function shippingOptionChange (request, details, event) {
+	console.log(request.shippingOption);
+	event.updateWith(Promise.resolve(selectShippingOption(details, request.shippingOption)));
 }
 
 jQuery(document).ready(function ($) {
@@ -252,7 +250,7 @@ jQuery(document).ready(function ($) {
 				return;
 			}
 			e.preventDefault();
-			var request = createApplePayRequest(getProductDetails(e.target.parentNode.parentNode));
+			var request = createPaymentRequestApplePay(getProductDetails(e.target.parentNode.parentNode));
 			var session = new ApplePaySession(1, request);
 			session.onvalidatemerchant = validateMerchant.bind(window, session);
 			session.onpaymentauthorized = paymentAuthorized.bind(window, session, request);
@@ -277,7 +275,12 @@ jQuery(document).ready(function ($) {
 			request.show()
 				.then(function (instrument) {
 					console.log(instrument);
-					instrument.complete();
+					instrument.complete()
+						.then(function () {
+							window.location = 'order-confirmation.html';
+						})
+				}, function (failure) {
+					console.error(failure);
 				});
 		});
 	})
