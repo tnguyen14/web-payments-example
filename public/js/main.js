@@ -120,16 +120,17 @@ function selectShippingMethod (request, shippingMethod) {
 	var total = Object.assign({}, request.total, {
 		amount: totalAmount.toString()
 	});
-	return {
+	return Object.assign({}, request, {
 		lineItems: lineItems,
 		total: total
-	};
+	});
 }
 
 function shippingContactSelected (session, request, event) {
 	console.log(event.shippingContact);
 	var updatedRequest = selectShippingMethod(request, shippingMethods[0]);
 	session.completeShippingContactSelection(ApplePaySession.STATUS_SUCCESS, shippingMethods, updatedRequest.total, updatedRequest.lineItems);
+	return updatedRequest;
 }
 
 function paymentAuthorized (session, request, event) {
@@ -153,6 +154,7 @@ function shippingMethodSelected (session, request, event) {
 	console.log(event.shippingMethod);
 	var updatedRequest = selectShippingMethod(request, event.shippingMethod);
 	session.completeShippingMethodSelection(ApplePaySession.STATUS_SUCCESS, updatedRequest.total, updatedRequest.lineItems);
+	return updatedRequest;
 }
 
 function cancel (session, event) {
@@ -252,12 +254,24 @@ jQuery(document).ready(function ($) {
 			e.preventDefault();
 			var request = createPaymentRequestApplePay(getProductDetails(e.target.parentNode.parentNode));
 			var session = new ApplePaySession(1, request);
-			session.onvalidatemerchant = validateMerchant.bind(window, session);
-			session.onpaymentauthorized = paymentAuthorized.bind(window, session, request);
-			session.onshippingcontactselected = shippingContactSelected.bind(window, session, request);
-			session.onpaymentmethodselected = paymentMethodSelected.bind(window, session, request);
-			session.onshippingmethodselected = shippingMethodSelected.bind(window, session, request);
-			session.oncancel = cancel.bind(window, session);
+			session.onvalidatemerchant = function (event) {
+				validateMerchant(session, event);
+			}
+			session.onpaymentauthorized = function (event) {
+				paymentAuthorized(session, request, event);
+			}
+			session.onshippingcontactselected = function (event) {
+				request = shippingContactSelected(session, request, event);
+			}
+			session.onpaymentmethodselected = function (event) {
+				paymentMethodSelected(session, request, event);
+			}
+			session.onshippingmethodselected = function (event) {
+				request = shippingMethodSelected(session, request, event);
+			}
+			session.oncancel = function () {
+				cancel(session);
+			}
 			session.begin();
 		});
 	});
