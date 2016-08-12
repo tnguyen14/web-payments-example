@@ -10,7 +10,7 @@ function authorize (req, res) {
 	request.post({
 		url: process.env.PSP_URL,
 		headers: {
-			Authorization: 'Basic ' + process.env.PSP_USERNAME + ':' + process.env.PSP_PASSWORD
+			Authorization: 'Basic ' + Buffer.from(process.env.PSP_USERNAME + ':' + process.env.PSP_PASSWORD).toString('base64')
 		},
 		json: true,
 		body: {
@@ -19,7 +19,7 @@ function authorize (req, res) {
 			payment: {
 				payment_id: '089e4cd378bff63d9d7bd63f8f', // test UUID
 				type: 'ApplePay',
-				amount: req.body.amount,
+				amount: req.body.amount * 100,
 				currency: 'USD',
 				token: Buffer.from(JSON.stringify(token.paymentData))
 					.toString('base64')
