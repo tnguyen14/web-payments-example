@@ -87,7 +87,7 @@ function createPaymentRequestApplePay (product) {
 		currencyCode: currencyCode,
 		supportedNetworks: ['amex', 'visa', 'masterCard', 'discover'],
 		merchantCapabilities: ['supports3DS'],
-		requiredShippingContactFields: ['postalAddress', 'name', 'email', 'phone'],
+		requiredShippingContactFields: ['postalAddress', 'name', 'phone'],
 		requiredBillingContactFields: ['postalAddress', 'name'],
 		lineItems: [product],
 		total: {
