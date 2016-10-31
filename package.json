@@ -2,7 +2,7 @@
   "name": "apple-pay-web-example",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server/index.js",
   "directories": {
     "doc": "doc"
   },
