@@ -1,10 +1,12 @@
-# Apple Pay on the Web example
+# Web Payments Example
 
-Demo for Apple Pay for the Web.
+> Demo for Payment Request API and Apple Pay for the Web <https://lab.tridnguyen.com/web-payments-example/>.
 
-See <https://lab.tridnguyen.com/apple-pay-web-example/> on Safari on iOS 10 or macOS Sierra
+To see Payment Request API, use Chrome on Android version 53 or later.
 
-## Set up
+To see Apple Payfor the Web in action, use Safari on iOS 10 or macOS Sierra (please note that you'd need to have Apple Pay enabled on your phone, and "Allow Payments on Mac" enabled for desktop use).
+
+## Set up Apple Pay merchant account
 
 If you'd like to have your own instance of this running, follow the steps below:
 
