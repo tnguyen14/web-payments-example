@@ -16,7 +16,6 @@ app.use(cors({
 
 app.use(bodyParser.json());
 app.post('/merchant-validate', merchant.validate);
-app.post('/merchant-register', merchant.register);
 app.post('/payment-authorize', payment.authorize);
 
 app.use(express.static('public'));
