@@ -1,10 +1,11 @@
 {
-  "name": "apple-pay-web-example",
+  "name": "web-payments-example",
   "version": "1.0.0",
-  "description": "",
+  "description": "Demo to showcase PaymentRequest API and Apple Pay for the Web API",
   "main": "server/index.js",
-  "directories": {
-    "doc": "doc"
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/tnguyen14/web-payments-example"
   },
   "scripts": {
     "start": "forever start server/index.js && forever logs -f 0",

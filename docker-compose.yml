@@ -1,6 +1,6 @@
 version: '2'
 services:
-  apple-pay-web-example:
+  web-payments-example:
     build: .
     ports:
      - "14013:3000"
