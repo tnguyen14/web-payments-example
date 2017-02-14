@@ -1,38 +1,6 @@
 /* global jQuery, fetch, ApplePaySession */
-if (window.ApplePaySession) {
-	var STATUSES = {
-		Failure: ApplePaySession.STATUS_FAILURE,
-		InvalidBillingPostalAddress: ApplePaySession.STATUS_INVALID_BILLING_POSTAL_ADDRESS,
-		InvalidShippingPostalAddress: ApplePaySession.STATUS_INVALID_SHIPPING_POSTAL_ADDRESS,
-		InvalidShippingContact: ApplePaySession.STATUS_INVALID_SHIPPING_CONTACT,
-		PINRequired: ApplePaySession.STATUS_PIN_REQUIRED,
-		PINIncorrect: ApplePaySession.STATUS_PIN_INCORRECT,
-		PINLockout: ApplePaySession.STATUS_PIN_LOCKOUT
-	};
-}
 
-var currencyCode = 'USD';
-var totalLabel = 'Total';
-
-var shippingMethods = [{
-	label: 'Priority Shipping',
-	detail: 'USPS Priority Shipping',
-	amount: '5.99',
-	identifier: 'usps-priority'
-}, {
-	label: '2 Day Shipping',
-	detail: '2 Day Shipping - arrives on ' + new Date(Date.now() + 1000 * 60 * 60 * 24 * 2).toLocaleDateString(),
-	amount: '8.99',
-	identifier: '2-day'
-}];
-
-function mapStatus (status) {
-	if (status && STATUSES[status]) {
-		return STATUSES[status];
-	}
-	return ApplePaySession.STATUS_FAILURE;
-}
-
+/* fetch sugar methods */
 function handleResponse (response) {
 	return response.json()
 		.then(function (json) {
@@ -73,6 +41,44 @@ function postJson (url, data) {
 // 	}).then(handleResponse);
 // }
 
+const currencyCode = 'USD';
+const totalLabel = 'Total';
+
+const shippingMethods = [{
+	// label is only used for Apple Pay, not Payment Request
+	label: 'Priority Shipping',
+	// detail is used for Apple Pay
+	// and Payment Request's shipping method's label
+	detail: 'USPS Priority Shipping',
+	amount: '5.99',
+	identifier: 'usps-priority'
+}, {
+	label: '2 Day Shipping',
+	detail: '2 Day Shipping - arrives on ' + new Date(Date.now() + 1000 * 60 * 60 * 24 * 2).toLocaleDateString(),
+	amount: '8.99',
+	identifier: '2-day'
+}];
+
+/* Apple Pay Web */
+if (window.ApplePaySession) {
+	const STATUSES = {
+		Failure: ApplePaySession.STATUS_FAILURE,
+		InvalidBillingPostalAddress: ApplePaySession.STATUS_INVALID_BILLING_POSTAL_ADDRESS,
+		InvalidShippingPostalAddress: ApplePaySession.STATUS_INVALID_SHIPPING_POSTAL_ADDRESS,
+		InvalidShippingContact: ApplePaySession.STATUS_INVALID_SHIPPING_CONTACT,
+		PINRequired: ApplePaySession.STATUS_PIN_REQUIRED,
+		PINIncorrect: ApplePaySession.STATUS_PIN_INCORRECT,
+		PINLockout: ApplePaySession.STATUS_PIN_LOCKOUT
+	};
+}
+
+function mapStatus (status) {
+	if (status && STATUSES[status]) {
+		return STATUSES[status];
+	}
+	return ApplePaySession.STATUS_FAILURE;
+}
+
 function getProductDetails (productNode) {
 	return {
 		label: productNode.querySelector('h3').innerHTML,
@@ -81,7 +87,7 @@ function getProductDetails (productNode) {
 	}
 }
 
-function createPaymentRequestApplePay (product) {
+function createApplePayPaymentRequest (product) {
 	return {
 		countryCode: 'US',
 		currencyCode: currencyCode,
@@ -97,7 +103,7 @@ function createPaymentRequestApplePay (product) {
 	};
 }
 
-function validateMerchant (session, event) {
+function validateApplePayMerchant (session, event) {
 	postJson('merchant-validate', {
 		validationURL: event.validationURL
 	}).then(function (response) {
@@ -109,32 +115,55 @@ function validateMerchant (session, event) {
 	});
 }
 
-function selectShippingMethod (request, shippingMethod) {
+function applePayPaymentMethodSelected (session, request, event) {
+	console.log(event.paymentMethod);
+	session.completePaymentMethodSelection(request.total, request.lineItems);
+}
+
+function selectApplePayShippingMethod (request, shippingMethod) {
+	// add shipping method to line items
 	var lineItems = request.lineItems.concat({
 		label: shippingMethod.label,
 		amount: shippingMethod.amount
 	});
+
+	// calculate total amount
 	var totalAmount = lineItems.reduce(function (total, item) {
 		return total += parseFloat(item.amount);
 	}, 0);
+	// create a new total object with the new amount from 
+	// the request's original total
 	var total = Object.assign({}, request.total, {
 		amount: totalAmount.toString()
 	});
-	return Object.assign({}, request, {
-		lineItems: lineItems,
-		total: total
-	});
+	// return updated request
+	return Object.assign({}, request, {lineItems, total});
 }
 
-function shippingContactSelected (session, request, event) {
+function applePayShippingContactSelected (session, request, event) {
 	console.log(event.shippingContact);
-	var updatedRequest = selectShippingMethod(request, shippingMethods[0]);
-	session.completeShippingContactSelection(ApplePaySession.STATUS_SUCCESS, shippingMethods, updatedRequest.total, updatedRequest.lineItems);
+	var updatedRequest = selectApplePayShippingMethod(request,
+		shippingMethods[0]);
+	session.completeShippingContactSelection(ApplePaySession.STATUS_SUCCESS,
+		shippingMethods, updatedRequest.total, updatedRequest.lineItems);
+
+	// return the new request so the session's request can be updated
 	return updatedRequest;
 }
 
-function paymentAuthorized (session, request, event) {
-	console.log(event);
+function applePayShippingMethodSelected (session, request, event) {
+	console.log(event.shippingMethod);
+	var updatedRequest = selectApplePayShippingMethod(request,
+		event.shippingMethod);
+	session.completeShippingMethodSelection(ApplePaySession.STATUS_SUCCESS,
+		updatedRequest.total, updatedRequest.lineItems);
+
+	// return the new request so the session's request can be updated
+	return updatedRequest;
+}
+
+function applePayPaymentAuthorized (session, request, event) {
+	console.log(event.payment);
 	postJson('payment-authorize', {
 		payment: event.payment,
 		amount: request.total.amount
@@ -145,22 +174,45 @@ function paymentAuthorized (session, request, event) {
 	});
 }
 
-function paymentMethodSelected (session, request, event) {
-	console.log(event.paymentMethod);
-	session.completePaymentMethodSelection(request.total, request.lineItems);
-}
-
-function shippingMethodSelected (session, request, event) {
-	console.log(event.shippingMethod);
-	var updatedRequest = selectShippingMethod(request, event.shippingMethod);
-	session.completeShippingMethodSelection(ApplePaySession.STATUS_SUCCESS, updatedRequest.total, updatedRequest.lineItems);
-	return updatedRequest;
-}
-
 function cancel (session, event) {
 	console.log(event);
 }
 
+function startApplePay () {
+	// listen to apple pay buttons' click events
+	var applePayButtons = document.querySelectorAll('.apple-pay');
+	Array.prototype.forEach.call(applePayButtons, function (button) {
+		button.addEventListener('click', function (e) {
+			if (!window.ApplePaySession) {
+				return;
+			}
+			e.preventDefault();
+			var request = createApplePayPaymentRequest(getProductDetails(e.target.parentNode.parentNode));
+			var session = new ApplePaySession(1, request);
+			session.onvalidatemerchant = function (event) {
+				validateApplePayMerchant(session, event);
+			}
+			session.onpaymentmethodselected = function (event) {
+				applePayPaymentMethodSelected(session, request, event);
+			}
+			session.onshippingcontactselected = function (event) {
+				request = applePayShippingContactSelected(session, request, event);
+			}
+			session.onshippingmethodselected = function (event) {
+				request = applePayShippingMethodSelected(session, request, event);
+			}
+			session.onpaymentauthorized = function (event) {
+				applePayPaymentAuthorized(session, request, event);
+			}
+			session.oncancel = function () {
+				cancel(session);
+			}
+			session.begin();
+		});
+	});
+}
+
+/* Payment Request API */
 function createPaymentRequest (product) {
 	var methodData = [{
 		supportedMethods: ['visa', 'mastercard', 'amex']
@@ -227,7 +279,7 @@ function selectShippingOption (details, option) {
 			label: totalLabel,
 			amount: {
 				currency: currencyCode,
-				value: (Number(details.total.amount.value) + Number(selectedShippingMethod.amount)).toString()
+				value: (parseFloat(details.total.amount.value) + parseFloat(selectedShippingMethod.amount)).toString()
 			}
 		}
 	})
@@ -244,37 +296,8 @@ function shippingOptionChange (request, details, event) {
 	event.updateWith(Promise.resolve(selectShippingOption(details, request.shippingOption)));
 }
 
-jQuery(document).ready(function ($) {
-	var applePayButtons = document.querySelectorAll('.apple-pay');
-	Array.prototype.forEach.call(applePayButtons, function (button) {
-		button.addEventListener('click', function (e) {
-			if (!window.ApplePaySession) {
-				return;
-			}
-			e.preventDefault();
-			var request = createPaymentRequestApplePay(getProductDetails(e.target.parentNode.parentNode));
-			var session = new ApplePaySession(1, request);
-			session.onvalidatemerchant = function (event) {
-				validateMerchant(session, event);
-			}
-			session.onpaymentauthorized = function (event) {
-				paymentAuthorized(session, request, event);
-			}
-			session.onshippingcontactselected = function (event) {
-				request = shippingContactSelected(session, request, event);
-			}
-			session.onpaymentmethodselected = function (event) {
-				paymentMethodSelected(session, request, event);
-			}
-			session.onshippingmethodselected = function (event) {
-				request = shippingMethodSelected(session, request, event);
-			}
-			session.oncancel = function () {
-				cancel(session);
-			}
-			session.begin();
-		});
-	});
+function startPaymentRequest () {
+	// listen to buy now buttons' click events
 	var buyNowButtons = document.querySelectorAll('.buy-now');
 	Array.prototype.forEach.call(buyNowButtons, function (button) {
 		button.addEventListener('click', function (e) {
@@ -297,5 +320,10 @@ jQuery(document).ready(function ($) {
 					console.error(failure);
 				});
 		});
-	})
+	});
+}
+
+jQuery(document).ready(function ($) {
+	startApplePay();
+	startPaymentRequest();
 });
