@@ -22,3 +22,55 @@
 }());
 
 // Place any jQuery/helper plugins in here.
+
+function ready (fn) {
+	if (document.readyState != 'loading'){
+		fn();
+	} else {
+		document.addEventListener('DOMContentLoaded', fn);
+	}
+}
+
+/* fetch sugar methods */
+(function () {
+	window.postJson = postJson;
+	function handleResponse (response) {
+		return response.json()
+			.then(function (json) {
+				if (response.status >= 200 && response.status < 300) {
+					// Return success JSON response
+					return json;
+				}
+
+				// Throw error with response status
+				throw new Error(mapStatus(json ? json.status : null));
+			});
+	}
+
+	function postJson (url, data) {
+		var json = data;
+		if (typeof data === 'object') {
+			json = JSON.stringify(data);
+		} else if (typeof data !== 'string') {
+			throw new Error('Data must be an object or a JSON string.');
+		}
+		return fetch(url, {
+			method: 'POST',
+			credentials: 'include',
+			headers: {
+				'Content-Type': 'application/json',
+				'Accept': 'application/json'
+			},
+			body: json
+		}).then(handleResponse);
+	}
+
+	// function getJson (url) {
+	// 	return fetch(url, {
+	// 		credentials: 'include',
+	// 		headers: {
+	// 			'Accept': 'application/json'
+	// 		}
+	// 	}).then(handleResponse);
+	// }
+}());
