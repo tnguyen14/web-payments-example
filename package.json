@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "forever start server/index.js && forever logs -f 0",
-    "dev": "forever start -w server/index.js && forever logs -f 0",
+    "dev": "nodemon -w server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -23,5 +23,8 @@
     "express": "^4.14.0",
     "forever": "^0.15.2",
     "request": "^2.72.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.11.0"
   }
 }
