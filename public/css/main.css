@@ -108,11 +108,16 @@ body {
 	text-align: center;
 }
 
+.site-description {
+	text-align: center;
+	font-weight: normal;
+}
+
 .products {
 	align-items: center;
 	display: block;
 	width: 90%;
-	margin: 1rem auto;
+	margin: 2rem auto 1rem;
 }
 @media only screen and (min-width: 50em) {
 	.products {
