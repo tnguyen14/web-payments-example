@@ -12,6 +12,14 @@ If you'd like to have your own instance of this running, follow the steps below:
 
 1. Create an Apple Developer Account (at <https://developer.apple.com>)
 2. Create a Merchant ID (see [Configuring Your Environment](https://developer.apple.com/library/ios/ApplePay_Guide/Configuration.html))
+
+	To generate the Payment Processing Certificate on your own, run the following steps
+
+	```sh
+	openssl ecparam -out private.key -name prime256v1 -genkey
+	openssl req -new -sha256 -key private.key -nodes -out request.csr
+	```
+
 3. In the "Apple Pay on the Web" section, "Add Domain" under "Merchant Domains" and follow the instruction to verify your domain ownership
 4. Under "Apple Pay Merchant Identity", click on "Create Certificate".
 5. In order to create the Certificate Signing Request(CSR), run the following command (make sure you have `openssl` installed).
