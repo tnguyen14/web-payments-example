@@ -19,7 +19,7 @@
     "body-parser": "^1.15.2",
     "cors": "^2.7.1",
     "debug": "^2.2.0",
-    "dotenv-safe": "^2.3.1",
+    "dotenv-safe": "^4.0.4",
     "express": "^4.14.0",
     "forever": "^0.15.2",
     "request": "^2.72.0"
