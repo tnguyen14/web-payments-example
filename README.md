@@ -1,5 +1,7 @@
 # Web Payments Example
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/tnguyen14/web-payments-example.svg)](https://greenkeeper.io/)
+
 > Demo for Payment Request API and Apple Pay for the Web <https://lab.tridnguyen.com/web-payments-example/>.
 
 To see Payment Request API, use Chrome on Android version 53 or later.
